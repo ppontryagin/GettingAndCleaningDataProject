@@ -1,25 +1,45 @@
 Steps to clean data
 ============
 
-## Data Set Information
-The experiments have been carried out with a group of 30 volunteers within an age bracket of 19-48 years. Each person performed six activities (WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, LAYING) wearing a smartphone (Samsung Galaxy S II) on the waist. Using its embedded accelerometer and gyroscope, we captured 3-axial linear acceleration and 3-axial angular velocity at a constant rate of 50Hz. The experiments have been video-recorded to label the data manually. The obtained dataset has been randomly partitioned into two sets, where 70% of the volunteers was selected for generating the training data and 30% the test data. 
+# 1. Download and unzip files
+# 2. Initialize data arrays 
 
-The sensor signals (accelerometer and gyroscope) were pre-processed by applying noise filters and then sampled in fixed-width sliding windows of 2.56 sec and 50% overlap (128 readings/window). The sensor acceleration signal, which has gravitational and body motion components, was separated using a Butterworth low-pass filter into body acceleration and gravity. The gravitational force is assumed to have only low frequency components, therefore a filter with 0.3 Hz cutoff frequency was used. From each window, a vector of features was obtained by calculating variables from the time and frequency domain. 
+Read files to variables
+xTrainData, xTestData 
+yTrainData, yTestData
+subjectTrainData, subjectTestData
+featuresData, actLabels
 
-### Attribute Information
-For each record in the dataset it is provided: 
-- Triaxial acceleration from the accelerometer (total acceleration) and the estimated body acceleration. 
-- Triaxial Angular velocity from the gyroscope. 
-- A 561-feature vector with time and frequency domain variables. 
-- Its activity label. 
-- An identifier of the subject who carried out the experiment.
+# 3.  Combine data
+trainDenorm, testDenorm
 
-## Source data
-A full description is available at the site where the data was obtained: 
-http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones 
+# 4. Add column names
+header <- c("subject", "activity", as.character(featuresData$V2))
+colnames(trainDenorm) <- header
+colnames(testDenorm) <- header
 
-Here are the data for the project: 
-https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip 
+# 5. Substitue activity type
+trainDenorm$activity <- actLabels$V2[match(trainDenorm$activity, actLabels$V1)]
+testDenorm$activity <- actLabels$V2[match(testDenorm$activity, actLabels$V1)]
+
+# 6. Select only std, mean
+trainDenorm <- trainDenorm[grep("subject|activity|mean|std", names(trainDenorm))]
+testDenorm <- testDenorm[grep("subject|activity|mean|std", names(testDenorm))]
+
+##7  Merge the training and the test sets to create one data set.
+tidyData <- rbind(testDenorm, trainDenorm)
+
+# Final step ======================
+###  Creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+colNames2Aggregate <- grep("mean|std", names(tidyData))
+aggrData <- aggregate(tidyData[, colNames2Aggregate], list(subject=tidyData$subject, activity=tidyData$activity), mean)
+
+# Write to file!!!
+write.table(aggrData, "aggr_data.txt", row.name=FALSE)
+
+
+
 
 ## How to run
 
