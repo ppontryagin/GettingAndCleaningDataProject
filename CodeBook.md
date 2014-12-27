@@ -45,6 +45,4 @@ write.table(aggrData, "aggr_data.txt", row.name=FALSE)
 
 ```
 source(file = "run_analysis.R")
-str(data.frame.name)
-source()
 ```
